@@ -18,7 +18,7 @@
 	import dagre from '@dagrejs/dagre';
 
 	export let graph: {
-		nodes: Array<{ name: string; label: string | dagre.Label }>;
+		nodes: Array<{ name: string; label?: string | dagre.Label }>;
 		edges: Array<{ sourceId: string; targetId: string }>;
 	};
 
@@ -31,6 +31,12 @@
 	/** Number of pixels that separate nodes horizontally in the layout */
 	export let nodeSeparation = 50;
 
+	/** Default node width if not defined */
+	export let nodeWidth = 100;
+
+	/** Default node height if not defined */
+	export let nodeHeight = 50;
+
 	let g: dagre.graphlib.Graph;
 	$: {
 		g = new dagre.graphlib.Graph();
@@ -41,16 +47,18 @@
 			nodesep: nodeSeparation
 		});
 
-		g.setDefaultNodeLabel(function () {
-			return {};
-		});
-
 		g.setDefaultEdgeLabel(function () {
 			return {};
 		});
 
 		graph.nodes.forEach((n) => {
-			g.setNode(n.name, n.label);
+			// `g.setDefaultNodeLabel()` not applying, so manually handle
+			g.setNode(n.name, {
+				label: typeof n.label === 'string' ? n.label : n.name,
+				width: nodeWidth,
+				height: nodeHeight,
+				...(typeof n.label === 'object' ? n.label : null)
+			});
 		});
 
 		graph.edges.forEach((e) => {
