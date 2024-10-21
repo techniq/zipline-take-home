@@ -3,31 +3,58 @@
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
 	import { Button, Drawer, MenuField } from 'svelte-ux';
 	import { cls } from '@layerstack/tailwind';
-	import Dagre from '$lib/Dagre.svelte';
 	import { mdiClose } from '@mdi/js';
 
+	import Dagre from '$lib/Dagre.svelte';
+	import CurveMenuField from '$lib/CurveMenuField.svelte';
+
+	// const graph: ComponentProps<Dagre>['graph'] = {
+	// 	nodes: [
+	// 		{ name: 'kspacey', label: { label: 'Kevin Spacey', width: 144, height: 100 } },
+	// 		{ name: 'swilliams', label: { label: 'Saul Williams', width: 160, height: 100 } },
+	// 		{ name: 'bpitt', label: { label: 'Brad Pitt', width: 188, height: 100 } },
+	// 		{ name: 'hford', label: { label: 'Harrison Ford', width: 168, height: 100 } },
+	// 		{ name: 'lwilson', label: { label: 'Luke Wilson', width: 144, height: 100 } },
+	// 		{ name: 'kbacon', label: { label: 'Kevin Bacon', width: 121, height: 100 } }
+	// 	],
+	// 	edges: [
+	// 		{ sourceId: 'kspacey', targetId: 'swilliams' },
+	// 		{ sourceId: 'swilliams', targetId: 'kbacon' },
+	// 		{ sourceId: 'bpitt', targetId: 'kbacon' },
+	// 		{ sourceId: 'hford', targetId: 'lwilson' },
+	// 		{ sourceId: 'lwilson', targetId: 'kbacon' }
+	// 	]
+	// };
 	const graph: ComponentProps<Dagre>['graph'] = {
 		nodes: [
-			{ name: 'kspacey', label: { label: 'Kevin Spacey', width: 144, height: 100 } },
-			{ name: 'swilliams', label: { label: 'Saul Williams', width: 160, height: 100 } },
-			{ name: 'bpitt', label: { label: 'Brad Pitt', width: 188, height: 100 } },
-			{ name: 'hford', label: { label: 'Harrison Ford', width: 168, height: 100 } },
-			{ name: 'lwilson', label: { label: 'Luke Wilson', width: 144, height: 100 } },
-			{ name: 'kbacon', label: { label: 'Kevin Bacon', width: 121, height: 100 } }
+			{ name: 'A' },
+			{ name: 'B' },
+			{ name: 'C' },
+			{ name: 'D' },
+			{ name: 'E' },
+			{ name: 'F' },
+			{ name: 'G' },
+			{ name: 'H' },
+			{ name: 'I' }
 		],
 		edges: [
-			{ sourceId: 'kspacey', targetId: 'swilliams' },
-			{ sourceId: 'swilliams', targetId: 'kbacon' },
-			{ sourceId: 'bpitt', targetId: 'kbacon' },
-			{ sourceId: 'hford', targetId: 'lwilson' },
-			{ sourceId: 'lwilson', targetId: 'kbacon' }
+			{ sourceId: 'A', targetId: 'B' },
+			{ sourceId: 'C', targetId: 'B' },
+			{ sourceId: 'B', targetId: 'E' },
+			{ sourceId: 'B', targetId: 'F' },
+			{ sourceId: 'D', targetId: 'E' },
+			{ sourceId: 'D', targetId: 'F' },
+			{ sourceId: 'E', targetId: 'H' },
+			{ sourceId: 'G', targetId: 'H' },
+			{ sourceId: 'H', targetId: 'I' }
 		]
 	};
 
 	// TODO: Switch to $state() after solving node re-layout issue
-	let direction: ComponentProps<Dagre>['direction'] = 'top-bottom';
+	let direction: ComponentProps<Dagre>['direction'] = 'left-right';
 	let align: ComponentProps<Dagre>['align'] = 'up-left';
 	let nodeSeparation: ComponentProps<Dagre>['nodeSeparation'] = 50;
+	let curve: ComponentProps<CurveMenuField>['value'] = undefined;
 
 	// TODO: Fix type
 	// let selectedNode: (typeof graph)['nodes'][number] | null = null;
@@ -35,7 +62,7 @@
 </script>
 
 <div>
-	<div class="grid grid-cols-[1fr,1fr,1fr] gap-2 px-3 py-2 bg-surface-100 border-b">
+	<div class="grid grid-cols-[1fr,1fr,1fr,1fr] gap-2 px-3 py-2 bg-surface-100 border-b">
 		<MenuField
 			label="Direction"
 			bind:value={direction}
@@ -70,20 +97,35 @@
 			options={[
 				{ label: 'Compact', value: 10 },
 				{ label: 'Default', value: 50 },
-				{ label: 'Comfy', value: 100 }
+				{ label: 'Comfortable', value: 100 }
 			]}
 			menuIcon=""
 			stepper
 			dense
 		/>
+
+		<CurveMenuField bind:value={curve} dense />
 	</div>
 
 	<div class="h-[600px] p-4">
 		<Chart>
 			<Svg>
 				<Dagre {graph} {direction} {align} {nodeSeparation} let:nodes let:edges>
+					<g class="edges">
+						{#each edges as edge}
+							<Spline
+								data={edge.points}
+								x="x"
+								y="y"
+								class="stroke-surface-content/30"
+								tweened
+								{curve}
+							/>
+						{/each}
+					</g>
+
 					<g class="nodes">
-						{#each nodes as node (node.label)}
+						{#each nodes as node}
 							<Group
 								x={node.x - node.width / 2}
 								y={node.y - node.height / 2}
@@ -112,12 +154,6 @@
 									class={cls('text-xs pointer-events-none')}
 								/>
 							</Group>
-						{/each}
-					</g>
-
-					<g class="edges">
-						{#each edges as edge}
-							<Spline data={edge.points} x="x" y="y" class="stroke-surface-content/30" tweened />
 						{/each}
 					</g>
 				</Dagre>
