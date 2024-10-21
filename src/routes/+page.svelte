@@ -51,14 +51,14 @@
 	};
 
 	// TODO: Switch to $state() after solving node re-layout issue
-	let direction: ComponentProps<Dagre>['direction'] = 'left-right';
-	let align: ComponentProps<Dagre>['align'] = 'up-left';
-	let nodeSeparation: ComponentProps<Dagre>['nodeSeparation'] = 50;
-	let curve: ComponentProps<CurveMenuField>['value'] = undefined;
+	let direction: ComponentProps<Dagre>['direction'] = $state('left-right');
+	let align: ComponentProps<Dagre>['align'] = $state('up-left');
+	let nodeSeparation: ComponentProps<Dagre>['nodeSeparation'] = $state(50);
+	let curve: ComponentProps<CurveMenuField>['value'] = $state(undefined);
 
 	// TODO: Fix type
 	// let selectedNode: (typeof graph)['nodes'][number] | null = null;
-	let selectedNode: any = null;
+	let selectedNode: any = $state(null);
 </script>
 
 <div>
@@ -110,52 +110,54 @@
 	<div class="h-[600px] p-4">
 		<Chart>
 			<Svg>
-				<Dagre {graph} {direction} {align} {nodeSeparation} let:nodes let:edges>
-					<g class="edges">
-						{#each edges as edge}
-							<Spline
-								data={edge.points}
-								x="x"
-								y="y"
-								class="stroke-surface-content/30"
-								tweened
-								{curve}
-							/>
-						{/each}
-					</g>
-
-					<g class="nodes">
-						{#each nodes as node}
-							<Group
-								x={node.x - node.width / 2}
-								y={node.y - node.height / 2}
-								tweened
-								class="group"
-								on:click={() => {
-									selectedNode = node;
-								}}
-							>
-								<Rect
-									width={node.width}
-									height={node.height}
-									class={cls(
-										'fill-surface-200 stroke-1 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer'
-									)}
-									rx={10}
+				<Dagre {graph} {direction} {align} {nodeSeparation}>
+					{#snippet children({ nodes, edges })}
+						<g class="edges">
+							{#each edges as edge}
+								<Spline
+									data={edge.points}
+									x="x"
+									y="y"
+									class="stroke-surface-content/30"
+									tweened
+									{curve}
 								/>
+							{/each}
+						</g>
 
-								<Text
-									value={node.label}
-									x={node.width / 2}
-									y={node.height / 2}
-									dy={-2}
-									textAnchor="middle"
-									verticalAnchor="middle"
-									class={cls('text-xs pointer-events-none')}
-								/>
-							</Group>
-						{/each}
-					</g>
+						<g class="nodes">
+							{#each nodes as node}
+								<Group
+									x={node.x - node.width / 2}
+									y={node.y - node.height / 2}
+									tweened
+									class="group"
+									on:click={() => {
+										selectedNode = node;
+									}}
+								>
+									<Rect
+										width={node.width}
+										height={node.height}
+										class={cls(
+											'fill-surface-200 stroke-1 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer'
+										)}
+										rx={10}
+									/>
+
+									<Text
+										value={node.label}
+										x={node.width / 2}
+										y={node.height / 2}
+										dy={-2}
+										textAnchor="middle"
+										verticalAnchor="middle"
+										class={cls('text-xs pointer-events-none')}
+									/>
+								</Group>
+							{/each}
+						</g>
+					{/snippet}
 				</Dagre>
 			</Svg>
 		</Chart>
