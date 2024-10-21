@@ -36,6 +36,7 @@
 		"vitest": "^2.0.4"
 	},
 	"dependencies": {
+		"@dagrejs/dagre": "^1.1.4",
 		"@layerstack/tailwind": "^0.0.9",
 		"@layerstack/utils": "^0.0.5",
 		"@mdi/js": "^7.4.47",
