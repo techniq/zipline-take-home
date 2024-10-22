@@ -18,31 +18,46 @@
 	import dagre from '@dagrejs/dagre';
 	import type { DagreGraphData } from './types';
 
-	export let data: DagreGraphData;
+	interface Props {
+		data: DagreGraphData;
+		/** Direction for rank nodes */
+		direction?: keyof typeof RankDir;
 
-	/** Direction for rank nodes */
-	export let direction: keyof typeof RankDir = 'top-bottom';
+		/** Alignment for rank nodes */
+		align?: keyof typeof Align | undefined;
 
-	/** Alignment for rank nodes */
-	export let align: keyof typeof Align | undefined = undefined;
+		/** Number of pixels that separate nodes horizontally in the layout */
+		nodeSeparation?: number;
 
-	/** Number of pixels that separate nodes horizontally in the layout */
-	export let nodeSeparation = 50;
+		/** Number of pixels between each rank in the layout */
+		rankSeparation?: number;
 
-	/** Number of pixels between each rank in the layout */
-	export let rankSeparation = 50;
+		/** Default node width if not defined */
+		nodeWidth?: number;
 
-	/** Default node width if not defined */
-	export let nodeWidth = 100;
+		/** Default node height if not defined */
+		nodeHeight?: number;
 
-	/** Default node height if not defined */
-	export let nodeHeight = 50;
+		/** Filter nodes */
+		filterNodes?: (nodeId: string, graph: dagre.graphlib.Graph) => boolean;
 
-	export let filterNodes: (nodeId: string, graph: dagre.graphlib.Graph) => boolean = () => true;
+		children?: import('svelte').Snippet<[{ nodes: dagre.Node[]; edges: dagre.GraphEdge[] }]>;
+	}
 
-	let g: dagre.graphlib.Graph;
-	$: {
-		g = new dagre.graphlib.Graph();
+	let {
+		data,
+		direction = 'top-bottom',
+		align = undefined,
+		nodeSeparation = 50,
+		rankSeparation = 50,
+		nodeWidth = 100,
+		nodeHeight = 50,
+		filterNodes = () => true,
+		children
+	}: Props = $props();
+
+	let g = $derived.by(() => {
+		let g = new dagre.graphlib.Graph();
 
 		g.setGraph({
 			rankdir: RankDir[direction],
@@ -71,10 +86,12 @@
 		g = filterNodes ? g.filterNodes((nodeId) => filterNodes(nodeId, g)) : g;
 
 		dagre.layout(g);
-	}
 
-	$: nodes = g.nodes().map((id) => g.node(id));
-	$: edges = g.edges().map((edge) => g.edge(edge));
+		return g;
+	});
+
+	let nodes = $derived(g.nodes().map((id) => g.node(id)));
+	let edges = $derived(g.edges().map((edge) => ({ ...edge, ...g.edge(edge) })));
 </script>
 
-<slot {nodes} {edges} />
+{@render children?.({ nodes, edges })}

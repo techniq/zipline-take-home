@@ -30,10 +30,10 @@
 		edges: data.graph.edges
 	});
 
-	let direction: ComponentProps<Dagre>['direction'] = $state('left-right');
-	let align: ComponentProps<Dagre>['align'] = $state('up-left');
-	let nodeSeparation: ComponentProps<Dagre>['nodeSeparation'] = $state(50);
-	let rankSeparation: ComponentProps<Dagre>['rankSeparation'] = $state(50);
+	let direction: ComponentProps<typeof Dagre>['direction'] = $state('left-right');
+	let align: ComponentProps<typeof Dagre>['align'] = $state('up-left');
+	let nodeSeparation: ComponentProps<typeof Dagre>['nodeSeparation'] = $state(50);
+	let rankSeparation: ComponentProps<typeof Dagre>['rankSeparation'] = $state(50);
 	let curve: ComponentProps<CurveMenuField>['value'] = $state(undefined);
 
 	let filterNodeId = $state<string | null>(null);
@@ -148,75 +148,72 @@
 		>
 			<TransformControls />
 			<Svg>
-				<!-- TODO: Remove {#key} -->
-				{#key filterNodeId}
-					<Dagre
-						data={graph}
-						{direction}
-						{align}
-						{nodeSeparation}
-						{rankSeparation}
-						filterNodes={(nodeId, graph) => {
-							if (filterNodeId) {
-								// TODO: Do not grab upstream ancestors on each iteration
-								// TODO: Limit by depth from filter node
-								const upstream = ancestors(graph, filterNodeId);
-								return nodeId === filterNodeId || (upstream?.includes(nodeId) ?? false);
-							} else {
-								return true;
-							}
-						}}
-					>
-						{#snippet children({ nodes, edges }: { nodes: dagre.Node[]; edges: dagre.GraphEdge[] })}
-							<g class="edges">
-								{#each edges as edge}
-									<Spline
-										data={edge.points}
-										x="x"
-										y="y"
-										class="stroke-surface-content/30"
-										tweened
-										{curve}
+				<Dagre
+					data={graph}
+					{direction}
+					{align}
+					{nodeSeparation}
+					{rankSeparation}
+					filterNodes={(nodeId, graph) => {
+						if (filterNodeId) {
+							// TODO: Do not grab upstream ancestors on each iteration
+							// TODO: Limit by depth from filter node
+							const upstream = ancestors(graph, filterNodeId);
+							return nodeId === filterNodeId || (upstream?.includes(nodeId) ?? false);
+						} else {
+							return true;
+						}
+					}}
+				>
+					{#snippet children({ nodes, edges })}
+						<g class="edges">
+							{#each edges as edge (`${edge.v} ${edge.t}`)}
+								<Spline
+									data={edge.points}
+									x="x"
+									y="y"
+									class="stroke-surface-content/30"
+									tweened
+									{curve}
+								/>
+							{/each}
+						</g>
+
+						<g class="nodes">
+							{#each nodes as node (node.label)}
+								<Group
+									x={node.x - node.width / 2}
+									y={node.y - node.height / 2}
+									tweened
+									class="group"
+									on:click={() => {
+										// @ts-expect-error
+										selectedNode = node;
+									}}
+								>
+									<Rect
+										width={node.width}
+										height={node.height}
+										class={cls(
+											'fill-surface-200 stroke-2 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer'
+										)}
+										rx={10}
 									/>
-								{/each}
-							</g>
 
-							<g class="nodes">
-								{#each nodes as node (node.label)}
-									<Group
-										x={node.x - node.width / 2}
-										y={node.y - node.height / 2}
-										tweened
-										class="group"
-										on:click={() => {
-											// @ts-expect-error
-											selectedNode = node;
-										}}
-									>
-										<Rect
-											width={node.width}
-											height={node.height}
-											class={cls(
-												'fill-surface-200 stroke-2 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer'
-											)}
-											rx={10}
-										/>
-
-										<Text
-											value={node.label}
-											x={node.width / 2}
-											y={node.height / 2}
-											dy={-2}
-											textAnchor="middle"
-											verticalAnchor="middle"
-											class={cls('text-xs pointer-events-none')}
-										/>
-									</Group>
-								{/each}
-							</g>
-						{/snippet}
-					</Dagre>
-				{/key}
+									<Text
+										value={node.label}
+										x={node.width / 2}
+										y={node.height / 2}
+										dy={-2}
+										textAnchor="middle"
+										verticalAnchor="middle"
+										class={cls('text-xs pointer-events-none')}
+									/>
+								</Group>
+							{/each}
+						</g>
+					{/snippet}
+				</Dagre>
 			</Svg>
 		</Chart>
 	</div>
