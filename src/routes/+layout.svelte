@@ -2,7 +2,7 @@
 	import { AppBar, AppLayout, NavItem, settings, ThemeSelect } from 'svelte-ux';
 	import '../app.css';
 	import { page } from '$app/stores';
-	import { mdiHome } from '@mdi/js';
+	import { mdiWrenchOutline } from '@mdi/js';
 
 	let { children } = $props();
 
@@ -31,10 +31,10 @@
 
 <AppLayout>
 	<svelte:fragment slot="nav">
-		<NavItem text="Home" icon={mdiHome} path="/" currentUrl={$page.url} />
+		<NavItem text="Workflows" icon={mdiWrenchOutline} path="/" currentUrl={$page.url} />
 	</svelte:fragment>
 
-	<AppBar title="Example">
+	<AppBar title="Build system">
 		<div slot="actions">
 			<ThemeSelect />
 		</div>
