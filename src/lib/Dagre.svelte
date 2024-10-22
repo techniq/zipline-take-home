@@ -16,11 +16,9 @@
 
 <script lang="ts">
 	import dagre from '@dagrejs/dagre';
+	import type { DagreGraphData } from './types';
 
-	export let graph: {
-		nodes: Array<{ name: string; label?: string | dagre.Label }>;
-		edges: Array<{ sourceId: string; targetId: string }>;
-	};
+	export let data: DagreGraphData;
 
 	/** Direction for rank nodes */
 	export let direction: keyof typeof RankDir = 'top-bottom';
@@ -31,11 +29,16 @@
 	/** Number of pixels that separate nodes horizontally in the layout */
 	export let nodeSeparation = 50;
 
+	/** Number of pixels between each rank in the layout */
+	export let rankSeparation = 50;
+
 	/** Default node width if not defined */
 	export let nodeWidth = 100;
 
 	/** Default node height if not defined */
 	export let nodeHeight = 50;
+
+	export let filterNodes: (nodeId: string, graph: dagre.graphlib.Graph) => boolean = () => true;
 
 	let g: dagre.graphlib.Graph;
 	$: {
@@ -44,28 +47,29 @@
 		g.setGraph({
 			rankdir: RankDir[direction],
 			align: align ? Align[align] : undefined,
-			nodesep: nodeSeparation
+			nodesep: nodeSeparation,
+			ranksep: rankSeparation
 		});
 
 		g.setDefaultEdgeLabel(function () {
 			return {};
 		});
 
-		graph.nodes.forEach((n) => {
+		data.nodes.forEach((n) => {
 			// `g.setDefaultNodeLabel()` not applying, so manually handle
-			g.setNode(n.name, {
-				label: typeof n.label === 'string' ? n.label : n.name,
+			g.setNode(n.id, {
+				label: typeof n.label === 'string' ? n.label : n.id,
 				width: nodeWidth,
 				height: nodeHeight,
 				...(typeof n.label === 'object' ? n.label : null)
 			});
 		});
 
-		graph.edges.forEach((e) => {
+		data.edges.forEach((e) => {
 			g.setEdge(e.sourceId, e.targetId);
 		});
 
-		dagre.layout(g);
+		dagre.layout(filterNodes ? g.filterNodes((nodeId) => filterNodes(nodeId, g)) : g);
 	}
 
 	$: nodes = g.nodes().map((id) => g.node(id));
