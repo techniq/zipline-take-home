@@ -44,6 +44,7 @@
 		"@mdi/js": "^7.4.47",
 		"d3-shape": "^3.2.0",
 		"layerchart": "^0.54.1",
-		"svelte-ux": "^0.75.3"
+		"svelte-ux": "^0.75.3",
+		"sveltekit-search-params": "^3.0.0"
 	}
 }

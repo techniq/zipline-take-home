@@ -1,10 +1,13 @@
 <script lang="ts">
 	import type { ComponentProps } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
+	import { fly } from 'svelte/transition';
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
 	import { Button, Drawer, Field, MenuField, SelectField } from 'svelte-ux';
 	import dagre from '@dagrejs/dagre';
 	import { cls } from '@layerstack/tailwind';
+	import { queryParameters, ssp } from 'sveltekit-search-params';
+
 	import { mdiClose, mdiCog } from '@mdi/js';
 
 	import Dagre from '$lib/Dagre.svelte';
@@ -12,11 +15,12 @@
 	import TransformControls from '$lib/TransformControls.svelte';
 	import { ancestors } from '$lib/utils.js';
 	import type { ApiNodeData } from '$lib/types.js';
-	import { fly, slide } from 'svelte/transition';
 
 	let { data } = $props();
 
-	const graph = {
+	const params = queryParameters({ graph: ssp.string('simple') });
+
+	const graph = $derived({
 		nodes: data.graph.nodes.map((n) => {
 			return {
 				id: n.node_name,
@@ -24,7 +28,7 @@
 			};
 		}),
 		edges: data.graph.edges
-	};
+	});
 
 	let direction: ComponentProps<Dagre>['direction'] = $state('left-right');
 	let align: ComponentProps<Dagre>['align'] = $state('up-left');
@@ -38,7 +42,19 @@
 </script>
 
 <div>
-	<div class="grid grid-cols-[1fr,1fr,auto] items-center gap-2 px-3 py-2 bg-surface-100 border-b">
+	<div
+		class="grid grid-cols-[2fr,2fr,1fr,auto] items-center gap-2 px-3 py-2 bg-surface-100 border-b"
+	>
+		<MenuField
+			label="Graph"
+			options={[
+				{ label: 'Simple', value: 'simple' },
+				{ label: 'Generated', value: 'generated' }
+			]}
+			bind:value={$params.graph}
+			dense
+		/>
+
 		<SelectField
 			label="Filter node"
 			options={data.graph.nodes.map((n) => {
@@ -132,6 +148,7 @@
 		>
 			<TransformControls />
 			<Svg>
+				<!-- TODO: Remove {#key} -->
 				{#key filterNodeId}
 					<Dagre
 						data={graph}
@@ -142,6 +159,7 @@
 						filterNodes={(nodeId, graph) => {
 							if (filterNodeId) {
 								// TODO: Do not grab upstream ancestors on each iteration
+								// TODO: Limit by depth from filter node
 								const upstream = ancestors(graph, filterNodeId);
 								return nodeId === filterNodeId || (upstream?.includes(nodeId) ?? false);
 							} else {
@@ -171,6 +189,7 @@
 										tweened
 										class="group"
 										on:click={() => {
+											// @ts-expect-error
 											selectedNode = node;
 										}}
 									>

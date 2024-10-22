@@ -3,7 +3,7 @@ import { randomInteger } from 'svelte-ux/utils/number';
 
 type ApiGraph = { nodes: ApiNodeData[]; edges: DagreGraphData['edges'] };
 
-export function load() {
+export function load({ url }) {
 	const exampleGraph: ApiGraph = {
 		nodes: [
 			{ node_name: 'A', node_type: 'TYPE_1', tags: ['tag-1', 'tag-2'] },
@@ -31,7 +31,7 @@ export function load() {
 
 	const alpha = [...Array(26)].map((val, i) => String.fromCharCode(i + 65));
 
-	const simpleGraph: ApiGraph = {
+	const simpleGeneratedGraph: ApiGraph = {
 		nodes: alpha.map((a) => ({ node_name: a, node_type: 'TYPE_1', tags: ['tag-1'] })),
 		edges: alpha.flatMap((a, i) => {
 			if (i === 25) {
@@ -45,8 +45,12 @@ export function load() {
 		})
 	};
 
+	const graphs = { example: exampleGraph, generated: simpleGeneratedGraph };
+
+	// @ts-expect-error: Handles missing keys
+	const graph: ApiGraph = graphs[url.searchParams.get('graph') ?? 'example'] ?? exampleGraph;
+
 	return {
-		graph: exampleGraph
-		// graph: simpleGraph
+		graph
 	};
 }

@@ -51,12 +51,11 @@
 			ranksep: rankSeparation
 		});
 
-		g.setDefaultEdgeLabel(function () {
+		g.setDefaultEdgeLabel(() => {
 			return {};
 		});
 
 		data.nodes.forEach((n) => {
-			// `g.setDefaultNodeLabel()` not applying, so manually handle
 			g.setNode(n.id, {
 				label: typeof n.label === 'string' ? n.label : n.id,
 				width: nodeWidth,
