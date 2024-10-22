@@ -5,7 +5,7 @@ export type DagreGraphData = {
 	edges: Array<{ sourceId: string; targetId: string }>;
 };
 
-export type BuildNode = {
+export type ApiNodeData = {
 	node_name: string;
 	node_type: 'TYPE_1' | 'TYPE_2' | 'TYPE_3' | 'TYPE_4';
 	tags: string[];

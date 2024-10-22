@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { ComponentProps } from 'svelte';
+	import { cubicOut } from 'svelte/easing';
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
-	import { Button, Drawer, MenuField, SelectField } from 'svelte-ux';
+	import { Button, Drawer, Field, MenuField, SelectField } from 'svelte-ux';
 	import { cls } from '@layerstack/tailwind';
 	import { mdiClose } from '@mdi/js';
 	import dagre from '@dagrejs/dagre';
@@ -10,14 +11,15 @@
 	import CurveMenuField from '$lib/CurveMenuField.svelte';
 	import TransformControls from '$lib/TransformControls.svelte';
 	import { ancestors } from '$lib/utils.js';
-	import { cubicOut } from 'svelte/easing';
+	import type { ApiNodeData } from '$lib/types.js';
 
 	let { data } = $props();
 
 	const graph = {
 		nodes: data.graph.nodes.map((n) => {
 			return {
-				id: n.node_name
+				id: n.node_name,
+				label: n
 			};
 		}),
 		edges: data.graph.edges
@@ -30,7 +32,7 @@
 	let curve: ComponentProps<CurveMenuField>['value'] = $state(undefined);
 
 	let filterNodeId = $state<string | null>(null);
-	let selectedNode = $state<dagre.Node | null>(null);
+	let selectedNode = $state<(dagre.Node & ApiNodeData) | null>(null);
 </script>
 
 <div>
@@ -187,8 +189,21 @@
 
 <Drawer open={selectedNode != null} on:close={() => (selectedNode = null)}>
 	<Button icon={mdiClose} class="absolute right-0 m-1 p-1" on:click={() => (selectedNode = null)} />
-	<div class="w-[480px] max-w-[95vw] p-6">
-		<div class="mb-3 font-bold">Node details</div>
-		{selectedNode?.label}
+	<div class="w-[480px] max-w-[95vw] p-4">
+		<h2 class="mb-3 font-bold">Node details</h2>
+		<div class="grid gap-2">
+			<Field label="Name" dense>{selectedNode?.label}</Field>
+			<Field label="Type" dense>{selectedNode?.node_type}</Field>
+			<Field label="Tags" dense>
+				<div class="flex flex-wrap gap-2 my-1">
+					{#each selectedNode?.tags ?? [] as tag}
+						<span
+							class="text-xs px-2 border border-primary bg-primary-500/5 text-primary rounded-full font-semibold"
+							>{tag}</span
+						>
+					{/each}
+				</div>
+			</Field>
+		</div>
 	</div>
 </Drawer>

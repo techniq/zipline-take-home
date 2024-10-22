@@ -1,7 +1,7 @@
-import type { BuildNode, DagreGraphData } from '$lib/types';
+import type { ApiNodeData, DagreGraphData } from '$lib/types';
 import { randomInteger } from 'svelte-ux/utils/number';
 
-type ApiGraph = { nodes: BuildNode[]; edges: DagreGraphData['edges'] };
+type ApiGraph = { nodes: ApiNodeData[]; edges: DagreGraphData['edges'] };
 
 export function load() {
 	const exampleGraph: ApiGraph = {
