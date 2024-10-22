@@ -3,15 +3,16 @@
 	import { cubicOut } from 'svelte/easing';
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
 	import { Button, Drawer, Field, MenuField, SelectField } from 'svelte-ux';
-	import { cls } from '@layerstack/tailwind';
-	import { mdiClose } from '@mdi/js';
 	import dagre from '@dagrejs/dagre';
+	import { cls } from '@layerstack/tailwind';
+	import { mdiClose, mdiCog } from '@mdi/js';
 
 	import Dagre from '$lib/Dagre.svelte';
 	import CurveMenuField from '$lib/CurveMenuField.svelte';
 	import TransformControls from '$lib/TransformControls.svelte';
 	import { ancestors } from '$lib/utils.js';
 	import type { ApiNodeData } from '$lib/types.js';
+	import { fly, slide } from 'svelte/transition';
 
 	let { data } = $props();
 
@@ -33,10 +34,11 @@
 
 	let filterNodeId = $state<string | null>(null);
 	let selectedNode = $state<(dagre.Node & ApiNodeData) | null>(null);
+	let showSettings = $state(false);
 </script>
 
 <div>
-	<div class="grid grid-cols-[1fr,1fr,1fr,1fr,1fr] gap-2 px-3 py-2 bg-surface-100 border-b">
+	<div class="grid grid-cols-[1fr,1fr,auto] items-center gap-2 px-3 py-2 bg-surface-100 border-b">
 		<SelectField
 			label="Filter node"
 			options={data.graph.nodes.map((n) => {
@@ -48,65 +50,79 @@
 			bind:value={filterNodeId}
 			dense
 		/>
-
-		<MenuField
-			label="Direction"
-			options={[
-				{ label: 'Top → Bottom', value: 'top-bottom' },
-				{ label: 'Bottom → Top', value: 'bottom-top' },
-				{ label: 'Left → Right', value: 'left-right' },
-				{ label: 'Right → Left', value: 'right-left' }
-			]}
-			bind:value={direction}
-			menuIcon=""
-			stepper
-			dense
+		<div></div>
+		<Button
+			icon={mdiCog}
+			color={showSettings ? 'primary' : 'default'}
+			variant="fill-light"
+			on:click={() => (showSettings = !showSettings)}
 		/>
-
-		<MenuField
-			label="Align"
-			options={[
-				{ label: 'Up / Left', value: 'up-left' },
-				{ label: 'Up / Right', value: 'up-right' },
-				{ label: 'Down / Left', value: 'down-left' },
-				{ label: 'Down / Right', value: 'down-right' }
-			]}
-			bind:value={align}
-			menuIcon=""
-			stepper
-			dense
-		/>
-
-		<MenuField
-			label="Node Separation"
-			options={[
-				{ label: 'Compact', value: 10 },
-				{ label: 'Default', value: 50 },
-				{ label: 'Comfortable', value: 100 }
-			]}
-			bind:value={nodeSeparation}
-			menuIcon=""
-			stepper
-			dense
-		/>
-
-		<MenuField
-			label="Rank Separation"
-			options={[
-				{ label: 'Compact', value: 10 },
-				{ label: 'Default', value: 50 },
-				{ label: 'Comfortable', value: 100 }
-			]}
-			bind:value={rankSeparation}
-			menuIcon=""
-			stepper
-			dense
-		/>
-
-		<CurveMenuField bind:value={curve} dense />
 	</div>
 
-	<div class="h-[calc(100vh-128px)] p-4 overflow-hidden">
+	<div class="h-[calc(100vh-128px)] p-4 overflow-hidden relative">
+		{#if showSettings}
+			<div
+				class="absolute right-0 top-0 bottom-0 z-50 p-4 bg-surface-100/50 backdrop-blur-md border-l"
+				transition:fly={{ x: '100%' }}
+			>
+				<div class="grid gap-3">
+					<MenuField
+						label="Direction"
+						options={[
+							{ label: 'Top → Bottom', value: 'top-bottom' },
+							{ label: 'Bottom → Top', value: 'bottom-top' },
+							{ label: 'Left → Right', value: 'left-right' },
+							{ label: 'Right → Left', value: 'right-left' }
+						]}
+						bind:value={direction}
+						menuIcon=""
+						stepper
+						dense
+					/>
+
+					<MenuField
+						label="Align"
+						options={[
+							{ label: 'Up / Left', value: 'up-left' },
+							{ label: 'Up / Right', value: 'up-right' },
+							{ label: 'Down / Left', value: 'down-left' },
+							{ label: 'Down / Right', value: 'down-right' }
+						]}
+						bind:value={align}
+						menuIcon=""
+						stepper
+						dense
+					/>
+
+					<MenuField
+						label="Node separation"
+						options={[
+							{ label: 'Compact', value: 10 },
+							{ label: 'Default', value: 50 },
+							{ label: 'Comfortable', value: 100 }
+						]}
+						bind:value={nodeSeparation}
+						menuIcon=""
+						stepper
+						dense
+					/>
+
+					<MenuField
+						label="Rank separation"
+						options={[
+							{ label: 'Compact', value: 10 },
+							{ label: 'Default', value: 50 },
+							{ label: 'Comfortable', value: 100 }
+						]}
+						bind:value={rankSeparation}
+						menuIcon=""
+						stepper
+						dense
+					/>
+					<CurveMenuField label="Curve style" bind:value={curve} dense />
+				</div>
+			</div>
+		{/if}
 		<Chart
 			transform={{
 				mode: 'canvas',
