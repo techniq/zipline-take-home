@@ -69,7 +69,9 @@
 			g.setEdge(e.sourceId, e.targetId);
 		});
 
-		dagre.layout(filterNodes ? g.filterNodes((nodeId) => filterNodes(nodeId, g)) : g);
+		g = filterNodes ? g.filterNodes((nodeId) => filterNodes(nodeId, g)) : g;
+
+		dagre.layout(g);
 	}
 
 	$: nodes = g.nodes().map((id) => g.node(id));
