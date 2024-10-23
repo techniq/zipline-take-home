@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { ComponentProps } from 'svelte';
 	import { transformContext } from 'layerchart';
 	import { Button, Icon, MenuButton, Tooltip } from 'svelte-ux';
 	import { cls } from '@layerstack/tailwind';
@@ -27,6 +28,7 @@
 
 	export let placement: Placement = 'top-right';
 	export let orientation: 'horizontal' | 'vertical' = 'vertical';
+	export let size: ComponentProps<Button>['size'] = 'md';
 
 	type Actions = 'zoomIn' | 'zoomOut' | 'center' | 'reset' | 'scrollMode';
 	export let show: Actions[] = ['zoomIn', 'zoomOut', 'center', 'reset', 'scrollMode'];
@@ -87,8 +89,9 @@
 		<Tooltip title="Zoom in">
 			<Button
 				icon={mdiMagnifyPlusOutline}
+				{size}
 				on:click={() => transform.zoomIn()}
-				class="text-surface-content p-2"
+				class="text-surface-content"
 			/>
 		</Tooltip>
 	{/if}
@@ -97,8 +100,9 @@
 		<Tooltip title="Zoom out">
 			<Button
 				icon={mdiMagnifyMinusOutline}
+				{size}
 				on:click={() => transform.zoomOut()}
-				class="text-surface-content p-2"
+				class="text-surface-content"
 			/>
 		</Tooltip>
 	{/if}
@@ -107,8 +111,9 @@
 		<Tooltip title="Center">
 			<Button
 				icon={mdiImageFilterCenterFocus}
+				{size}
 				on:click={() => transform.translateCenter()}
-				class="text-surface-content p-2"
+				class="text-surface-content"
 			/>
 		</Tooltip>
 	{/if}
@@ -117,8 +122,9 @@
 		<Tooltip title="Reset">
 			<Button
 				icon={mdiArrowULeftTop}
+				{size}
 				on:click={() => transform.reset()}
-				class="text-surface-content p-2"
+				class="text-surface-content"
 			/>
 		</Tooltip>
 	{/if}
@@ -135,6 +141,7 @@
 				menuProps={{ placement: menuPlacementByOrientationAndPlacement[orientation][placement] }}
 				menuIcon={null}
 				value={$scrollMode}
+				{size}
 				on:change={(e) => transform.setScrollMode(e.detail.value)}
 				class="text-surface-content"
 			>

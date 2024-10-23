@@ -11,6 +11,9 @@ importers:
       '@dagrejs/dagre':
         specifier: ^1.1.4
         version: 1.1.4
+      '@layerstack/svelte-stores':
+        specifier: ^0.0.6
+        version: 0.0.6
       '@layerstack/tailwind':
         specifier: ^0.0.9
         version: 0.0.9

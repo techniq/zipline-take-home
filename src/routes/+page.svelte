@@ -4,8 +4,9 @@
 	import { fly } from 'svelte/transition';
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
 	import { Button, Drawer, Field, MenuField, SelectField } from 'svelte-ux';
-	import dagre from '@dagrejs/dagre';
+	import { mdScreen } from '@layerstack/svelte-stores';
 	import { cls } from '@layerstack/tailwind';
+	import dagre from '@dagrejs/dagre';
 	import { queryParameters, ssp } from 'sveltekit-search-params';
 
 	import { mdiClose, mdiCog } from '@mdi/js';
@@ -42,9 +43,7 @@
 </script>
 
 <div>
-	<div
-		class="grid grid-cols-[2fr,2fr,1fr,auto] items-center gap-2 px-3 py-2 bg-surface-100 border-b"
-	>
+	<div class="grid grid-cols-[1fr,1fr,auto] items-center gap-2 px-3 py-2 bg-surface-100 border-b">
 		<MenuField
 			label="Graph"
 			options={[
@@ -67,7 +66,7 @@
 			bind:value={filterNodeId}
 			dense
 		/>
-		<div></div>
+		<!-- <div></div> -->
 		<Button
 			icon={mdiCog}
 			color={showSettings ? 'primary' : 'default'}
@@ -147,7 +146,12 @@
 				tweened: { duration: 800, easing: cubicOut }
 			}}
 		>
-			<TransformControls />
+			<TransformControls
+				orientation={$mdScreen ? 'vertical' : 'horizontal'}
+				placement={$mdScreen ? 'top-right' : 'bottom'}
+				size={$mdScreen ? 'md' : 'lg'}
+				class="border border-surface-content/10"
+			/>
 			<Svg>
 				<Dagre
 					data={graph}
