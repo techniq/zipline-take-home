@@ -167,7 +167,7 @@
 				>
 					{#snippet children({ nodes, edges })}
 						<g class="edges">
-							{#each edges as edge (`${edge.v} ${edge.t}`)}
+							{#each edges as edge, i (i)}
 								<Spline
 									data={edge.points}
 									x="x"
