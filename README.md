@@ -1,4 +1,4 @@
-# Zipline AI assignment
+# Zipline AI take-home [assignment](https://github.com/ken-zlai/take-home-full-stack)
 
 ## Run locally
 
