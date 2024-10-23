@@ -1,10 +1,12 @@
 import type { ApiNodeData, DagreGraphData } from '$lib/types';
-import { randomInteger } from 'svelte-ux/utils/number';
+import { randomInteger } from '@layerstack/utils';
+import { unique } from '@layerstack/utils/array';
+import { range } from 'd3-array';
 
 type ApiGraph = { nodes: ApiNodeData[]; edges: DagreGraphData['edges'] };
 
 export function load({ url }) {
-	const exampleGraph: ApiGraph = {
+	const basicGraph: ApiGraph = {
 		nodes: [
 			{ node_name: 'A', node_type: 'TYPE_1', tags: ['tag-1', 'tag-2'] },
 			{ node_name: 'B', node_type: 'TYPE_2', tags: ['tag-2'] },
@@ -31,13 +33,26 @@ export function load({ url }) {
 
 	const alpha = [...Array(26)].map((val, i) => String.fromCharCode(i + 65));
 
-	const simpleGeneratedGraph: ApiGraph = {
-		nodes: alpha.map((a) => ({ node_name: a, node_type: 'TYPE_1', tags: ['tag-1'] })),
+	function getRandomTags() {
+		return range(randomInteger(1, 10)).map((n) => {
+			return `tag-${n + 1}`;
+		});
+	}
+
+	function getRandomDownstreamIds(index: number) {
+		return unique(range(randomInteger(1, 3)).map(() => randomInteger(index + 1, 25)));
+	}
+
+	const generatedSimpleGraph: ApiGraph = {
+		nodes: alpha.map((a) => ({
+			node_name: a,
+			node_type: `TYPE_${randomInteger(1, 4)}` as ApiGraph['nodes'][number]['node_type'],
+			tags: getRandomTags()
+		})),
 		edges: alpha.flatMap((a, i) => {
 			if (i === 25) {
 				return [];
 			} else {
-				// TODO: Generate more than 1 downstream edge for some nodes
 				const randomDownstreamId = randomInteger(i + 1, 25);
 				const edge = { sourceId: a, targetId: alpha[randomDownstreamId] };
 				return [edge];
@@ -45,10 +60,31 @@ export function load({ url }) {
 		})
 	};
 
-	const graphs = { example: exampleGraph, generated: simpleGeneratedGraph };
+	const generatedComplexGraph: ApiGraph = {
+		nodes: alpha.map((a) => ({
+			node_name: a,
+			node_type: `TYPE_${randomInteger(1, 4)}` as ApiGraph['nodes'][number]['node_type'],
+			tags: getRandomTags()
+		})),
+		edges: alpha.flatMap((a, i) => {
+			if (i === 25) {
+				return [];
+			} else {
+				return getRandomDownstreamIds(i).map((id) => {
+					return { sourceId: a, targetId: alpha[id] };
+				});
+			}
+		})
+	};
+
+	const graphs = {
+		basic: basicGraph,
+		generated_simple: generatedSimpleGraph,
+		generated_complex: generatedComplexGraph
+	};
 
 	// @ts-expect-error: Handles missing keys
-	const graph: ApiGraph = graphs[url.searchParams.get('graph') ?? 'example'] ?? exampleGraph;
+	const graph: ApiGraph = graphs[url.searchParams.get('graph') ?? 'basic'] ?? basicGraph;
 
 	return {
 		graph

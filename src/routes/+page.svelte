@@ -18,7 +18,7 @@
 
 	let { data } = $props();
 
-	const params = queryParameters({ graph: ssp.string('simple') });
+	const params = queryParameters({ graph: ssp.string('basic') });
 
 	const graph = $derived({
 		nodes: data.graph.nodes.map((n) => {
@@ -48,8 +48,9 @@
 		<MenuField
 			label="Graph"
 			options={[
-				{ label: 'Simple', value: 'simple' },
-				{ label: 'Generated', value: 'generated' }
+				{ label: 'Basic', value: 'basic' },
+				{ label: 'Generated (simple)', value: 'generated_simple' },
+				{ label: 'Generated (complex)', value: 'generated_complex' }
 			]}
 			bind:value={$params.graph}
 			dense
