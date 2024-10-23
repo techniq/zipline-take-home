@@ -4,8 +4,17 @@
 	import { MenuField } from 'svelte-ux';
 	import { entries } from '@layerstack/utils';
 
-	export let value: any | undefined = d3shapes['curveLinear'];
-	export let showOpenClosed = false;
+	interface Props {
+		value?: any | undefined;
+		showOpenClosed?: boolean;
+		[key: string]: any;
+	}
+
+	let {
+		value = $bindable(d3shapes['curveLinear']),
+		showOpenClosed = false,
+		...rest
+	}: Props = $props();
 
 	const options = entries(d3shapes)
 		.filter(([key]) => {
@@ -23,11 +32,4 @@
 		});
 </script>
 
-<MenuField
-	label="Curve"
-	{options}
-	bind:value
-	stepper
-	classes={{ menuIcon: 'hidden' }}
-	{...$$restProps}
-/>
+<MenuField label="Curve" {options} bind:value stepper classes={{ menuIcon: 'hidden' }} {...rest} />
