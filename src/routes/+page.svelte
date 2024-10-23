@@ -3,13 +3,13 @@
 	import { cubicOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
 	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
-	import { Button, Drawer, Field, MenuField, SelectField } from 'svelte-ux';
+	import { Button, Drawer, Field, MenuField, ScrollingValue, SelectField } from 'svelte-ux';
 	import { mdScreen } from '@layerstack/svelte-stores';
 	import { cls } from '@layerstack/tailwind';
 	import dagre from '@dagrejs/dagre';
 	import { queryParameters, ssp } from 'sveltekit-search-params';
 
-	import { mdiClose, mdiCog } from '@mdi/js';
+	import { mdiClose, mdiCog, mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 
 	import Dagre from '$lib/Dagre.svelte';
 	import CurveMenuField from '$lib/CurveMenuField.svelte';
@@ -39,6 +39,7 @@
 
 	let filterNodeId = $state<string | null>(null);
 	let selectedNode = $state<(dagre.Node & ApiNodeData) | null>(null);
+	let maxDepth = $state(10);
 	let showSettings = $state(false);
 </script>
 
@@ -66,7 +67,7 @@
 			bind:value={filterNodeId}
 			dense
 		/>
-		<!-- <div></div> -->
+
 		<Button
 			icon={mdiCog}
 			color={showSettings ? 'primary' : 'default'}
@@ -82,6 +83,30 @@
 				transition:fly={{ x: '100%' }}
 			>
 				<div class="grid gap-3">
+					<Field label="Max Depth" disabled={filterNodeId == null} dense>
+						<div slot="prepend">
+							<Button
+								icon={mdiChevronLeft}
+								on:click={() => {
+									if (maxDepth > 1) {
+										maxDepth -= 1;
+									}
+								}}
+								size="sm"
+								class="mr-2"
+							/>
+						</div>
+						<ScrollingValue bind:value={maxDepth} classes={{ value: 'text-sm' }} />
+						<div slot="append">
+							<Button
+								icon={mdiChevronRight}
+								on:click={() => (maxDepth += 1)}
+								size="sm"
+								class="mr-2"
+							/>
+						</div>
+					</Field>
+
 					<MenuField
 						label="Direction"
 						options={[
@@ -162,8 +187,7 @@
 					filterNodes={(nodeId, graph) => {
 						if (filterNodeId) {
 							// TODO: Do not grab upstream ancestors on each iteration
-							// TODO: Limit by depth from filter node
-							const upstream = ancestors(graph, filterNodeId) as unknown as string[];
+							const upstream = ancestors(graph, filterNodeId, maxDepth) as unknown as string[];
 							return nodeId === filterNodeId || (upstream?.includes(nodeId) ?? false);
 						} else {
 							return true;

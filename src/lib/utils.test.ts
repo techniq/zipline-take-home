@@ -66,6 +66,12 @@ describe('accessors', () => {
 		const actual = ancestors(graph, 'I');
 		expect(actual).to.have.members(['A', 'B', 'C', 'D', 'E', 'G', 'H']);
 	});
+
+	it('max depth', () => {
+		const graph = buildGraph(exampleGraph);
+		const actual = ancestors(graph, 'H', 2);
+		expect(actual).to.have.members(['B', 'D', 'E', 'G']);
+	});
 });
 
 describe('descendants', () => {
@@ -85,5 +91,11 @@ describe('descendants', () => {
 		const graph = buildGraph(exampleGraph);
 		const actual = descendants(graph, 'I');
 		expect(actual).length(0);
+	});
+
+	it('max depth', () => {
+		const graph = buildGraph(exampleGraph);
+		const actual = descendants(graph, 'B', 2);
+		expect(actual).to.have.members(['E', 'F', 'H']);
 	});
 });
