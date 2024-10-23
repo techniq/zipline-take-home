@@ -26,14 +26,24 @@
 		| 'bottom'
 		| 'bottom-right';
 
-	export let placement: Placement = 'top-right';
-	export let orientation: 'horizontal' | 'vertical' = 'vertical';
-	export let size: ComponentProps<Button>['size'] = 'md';
-
 	type Actions = 'zoomIn' | 'zoomOut' | 'center' | 'reset' | 'scrollMode';
-	export let show: Actions[] = ['zoomIn', 'zoomOut', 'center', 'reset', 'scrollMode'];
+	interface Props {
+		placement?: Placement;
+		orientation?: 'horizontal' | 'vertical';
+		size?: ComponentProps<Button>['size'];
+		show?: Actions[];
+		class?: string;
+	}
 
-	$: menuPlacementByOrientationAndPlacement = {
+	let {
+		placement = 'top-right',
+		orientation = 'vertical',
+		size = 'md',
+		show = ['zoomIn', 'zoomOut', 'center', 'reset', 'scrollMode'],
+		...restProps
+	}: Props = $props();
+
+	let menuPlacementByOrientationAndPlacement = $derived({
 		horizontal: {
 			'top-left': 'bottom-end',
 			top: 'bottom-end',
@@ -56,13 +66,13 @@
 			bottom: 'right-end',
 			'bottom-right': 'left-end'
 		}
-	} as const;
+	} as const);
 
 	const transform = transformContext();
 	const scrollMode = transform.scrollMode;
 </script>
 
-<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	class={cls(
 		'bg-surface-200/50 rounded-full m-1 backdrop-blur z-10 flex',
@@ -78,9 +88,9 @@
 			bottom: 'absolute bottom-0 left-1/2 -translate-x-1/2',
 			'bottom-right': 'absolute bottom-0 right-0'
 		}[placement],
-		$$props.class
+		restProps.class
 	)}
-	on:dblclick={(e) => {
+	ondblclick={(e) => {
 		// Stop from propagating to TransformContext
 		e.stopPropagation();
 	}}
@@ -145,9 +155,9 @@
 				on:change={(e) => transform.setScrollMode(e.detail.value)}
 				class="text-surface-content"
 			>
-				<svelte:fragment slot="selection" let:value>
+				{#snippet selection({ value }: any)}
 					<Icon data={value?.icon ?? mdiChevronDown} />
-				</svelte:fragment>
+				{/snippet}
 			</MenuButton>
 		</Tooltip>
 	{/if}
