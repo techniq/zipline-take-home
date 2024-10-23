@@ -8,6 +8,7 @@
 	import { cls } from '@layerstack/tailwind';
 	import dagre from '@dagrejs/dagre';
 	import { queryParameters, ssp } from 'sveltekit-search-params';
+	import { curveLinear } from 'd3-shape';
 
 	import { mdiClose, mdiCog, mdiChevronLeft, mdiChevronRight } from '@mdi/js';
 
@@ -35,7 +36,7 @@
 	let align: ComponentProps<typeof Dagre>['align'] = $state('up-left');
 	let nodeSeparation: ComponentProps<typeof Dagre>['nodeSeparation'] = $state(50);
 	let rankSeparation: ComponentProps<typeof Dagre>['rankSeparation'] = $state(50);
-	let curve: ComponentProps<typeof CurveMenuField>['value'] = $state(undefined);
+	let curve: ComponentProps<typeof CurveMenuField>['value'] = $state(curveLinear);
 
 	let filterNodeId = $state<string | null>(null);
 	let selectedNode = $state<(dagre.Node & ApiNodeData) | null>(null);
