@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { AppBar, AppLayout, NavItem, settings, ThemeSelect } from 'svelte-ux';
-	import '../app.css';
 	import { page } from '$app/stores';
 	import { mdiWrenchOutline } from '@mdi/js';
+
+	import '../app.css';
 
 	let { children } = $props();
 

@@ -159,7 +159,7 @@
 						if (filterNodeId) {
 							// TODO: Do not grab upstream ancestors on each iteration
 							// TODO: Limit by depth from filter node
-							const upstream = ancestors(graph, filterNodeId);
+							const upstream = ancestors(graph, filterNodeId) as unknown as string[];
 							return nodeId === filterNodeId || (upstream?.includes(nodeId) ?? false);
 						} else {
 							return true;
