@@ -2,7 +2,7 @@
 	import type { ComponentProps } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 	import { fly } from 'svelte/transition';
-	import { Chart, Group, Rect, Spline, Svg, Text } from 'layerchart';
+	import { Chart, Group, Rect, Spline, Svg, Text, Tooltip } from 'layerchart';
 	import { Button, Drawer, Field, MenuField, ScrollingValue, SelectField } from 'svelte-ux';
 	import { mdScreen } from '@layerstack/svelte-stores';
 	import { cls } from '@layerstack/tailwind';
@@ -32,6 +32,7 @@
 		edges: data.graph.edges
 	});
 
+	let ranker: ComponentProps<typeof Dagre>['ranker'] = $state('network-simplex');
 	let direction: ComponentProps<typeof Dagre>['direction'] = $state('left-right');
 	let align: ComponentProps<typeof Dagre>['align'] = $state('up-left');
 	let nodeSeparation: ComponentProps<typeof Dagre>['nodeSeparation'] = $state(50);
@@ -42,6 +43,8 @@
 	let selectedNode = $state<(dagre.Node & ApiNodeData) | null>(null);
 	let maxDepth = $state(10);
 	let showSettings = $state(false);
+
+	let highlightType = $state<string | null>(null);
 </script>
 
 <div>
@@ -109,6 +112,19 @@
 					</Field>
 
 					<MenuField
+						label="Ranker"
+						options={[
+							{ label: 'Network-Simplex', value: 'network-simplex' },
+							{ label: 'Tight tree', value: 'tight-tree' },
+							{ label: 'Longest path', value: 'longest-path' }
+						]}
+						bind:value={ranker}
+						menuIcon=""
+						stepper
+						dense
+					/>
+
+					<MenuField
 						label="Direction"
 						options={[
 							{ label: 'Top → Bottom', value: 'top-bottom' },
@@ -171,6 +187,7 @@
 				initialScrollMode: 'scale',
 				tweened: { duration: 800, easing: cubicOut }
 			}}
+			let:tooltip
 		>
 			<TransformControls
 				orientation={$mdScreen ? 'vertical' : 'horizontal'}
@@ -181,6 +198,7 @@
 			<Svg>
 				<Dagre
 					data={graph}
+					{ranker}
 					{direction}
 					{align}
 					{nodeSeparation}
@@ -220,12 +238,24 @@
 										// @ts-expect-error
 										selectedNode = node;
 									}}
+									on:pointermove={(e) => {
+										highlightType = node.node_type;
+										tooltip.show(e, node);
+									}}
+									on:pointerleave={() => {
+										highlightType = null;
+										tooltip.hide();
+									}}
 								>
 									<Rect
 										width={node.width}
 										height={node.height}
 										class={cls(
-											'fill-surface-200 stroke-2 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer'
+											'fill-surface-200 stroke-2 stroke-primary/50 group-hover:fill-primary/10 group-hover:cursor-pointer',
+											highlightType &&
+												(highlightType === node.node_type
+													? 'stroke-secondary/50 group-hover:fill-secondary/10'
+													: 'opacity-30')
 										)}
 										rx={10}
 									/>
@@ -245,6 +275,24 @@
 					{/snippet}
 				</Dagre>
 			</Svg>
+
+			<Tooltip.Root>
+				{#snippet children({ data })}
+					<Tooltip.Header>
+						{data.node_name}
+					</Tooltip.Header>
+					<Tooltip.List>
+						<Tooltip.Item label="node_type">{data.node_type}</Tooltip.Item>
+						<Tooltip.Item label="tags">
+							<div class="flex flex-wrap gap-2 max-w-[240px]">
+								{#each data.tags as tag}
+									{@render displayTag(tag)}
+								{/each}
+							</div>
+						</Tooltip.Item>
+					</Tooltip.List>
+				{/snippet}
+			</Tooltip.Root>
 		</Chart>
 	</div>
 </div>
@@ -259,13 +307,18 @@
 			<Field label="Tags" dense>
 				<div class="flex flex-wrap gap-2 my-1">
 					{#each selectedNode?.tags ?? [] as tag}
-						<span
-							class="text-xs px-2 border border-primary bg-primary-500/5 text-primary rounded-full font-semibold"
-							>{tag}</span
-						>
+						{@render displayTag(tag)}
 					{/each}
 				</div>
 			</Field>
 		</div>
 	</div>
 </Drawer>
+
+{#snippet displayTag(tag: string)}
+	<span
+		class="text-xs px-2 border border-primary bg-primary-500/5 text-primary rounded-full font-semibold"
+	>
+		{tag}</span
+	>
+{/snippet}

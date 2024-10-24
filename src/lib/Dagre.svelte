@@ -20,6 +20,9 @@
 
 	interface Props {
 		data: DagreGraphData;
+
+		ranker?: 'network-simplex' | 'tight-tree' | 'longest-path';
+
 		/** Direction for rank nodes */
 		direction?: keyof typeof RankDir;
 
@@ -46,6 +49,7 @@
 
 	let {
 		data,
+		ranker,
 		direction = 'top-bottom',
 		align = undefined,
 		nodeSeparation = 50,
@@ -60,6 +64,7 @@
 		let g = new dagre.graphlib.Graph();
 
 		g.setGraph({
+			ranker: ranker,
 			rankdir: RankDir[direction],
 			align: align ? Align[align] : undefined,
 			nodesep: nodeSeparation,
