@@ -87,30 +87,6 @@
 				transition:fly={{ x: '100%' }}
 			>
 				<div class="grid gap-3">
-					<Field label="Max Depth" disabled={filterNodeId == null} dense>
-						<div slot="prepend">
-							<Button
-								icon={mdiChevronLeft}
-								on:click={() => {
-									if (maxDepth > 1) {
-										maxDepth -= 1;
-									}
-								}}
-								size="sm"
-								class="mr-2"
-							/>
-						</div>
-						<ScrollingValue bind:value={maxDepth} classes={{ value: 'text-sm' }} />
-						<div slot="append">
-							<Button
-								icon={mdiChevronRight}
-								on:click={() => (maxDepth += 1)}
-								size="sm"
-								class="mr-2"
-							/>
-						</div>
-					</Field>
-
 					<MenuField
 						label="Ranker"
 						options={[
@@ -177,7 +153,32 @@
 						stepper
 						dense
 					/>
+
 					<CurveMenuField label="Curve style" bind:value={curve} dense />
+
+					<Field label="Max Depth" disabled={filterNodeId == null} dense>
+						<div slot="prepend">
+							<Button
+								icon={mdiChevronLeft}
+								on:click={() => {
+									if (maxDepth > 1) {
+										maxDepth -= 1;
+									}
+								}}
+								size="sm"
+								class="mr-2"
+							/>
+						</div>
+						<ScrollingValue bind:value={maxDepth} classes={{ value: 'text-sm' }} />
+						<div slot="append">
+							<Button
+								icon={mdiChevronRight}
+								on:click={() => (maxDepth += 1)}
+								size="sm"
+								class="mr-2"
+							/>
+						</div>
+					</Field>
 				</div>
 			</div>
 		{/if}
