@@ -72,6 +72,7 @@
 
 		data.nodes.forEach((n) => {
 			g.setNode(n.id, {
+				id: n.id,
 				label: typeof n.label === 'string' ? n.label : n.id,
 				width: nodeWidth,
 				height: nodeHeight,
